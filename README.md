@@ -8,44 +8,37 @@ code** — that lives in a private upstream monorepo and is published here as bi
 [ Upstream Monorepo ]       [ This Distribution Repo ]
 ┌───────────────────┐       ┌──────────────────────────────┐
 │ - Engine Source   │──────▶│ - Release tarballs (weave-v*) │
-│ - Build System    │ CI    │ - latest.json (current ver)   │
-│ - .weave Specs    │ Cuts  │ - Examples & Docs             │
-│ - CSS Subsets     │ Tag   │ - sha256 checksums            │
+│ - Build System    │ CI    │ - Examples & Docs             │
+│ - .weave Specs    │ Cuts  │                               │
+│ - CSS Subsets     │ Tag   │                               │
 └───────────────────┘       └──────────────────────────────┘
   (Source of Truth)           (Deployment & Usage)
 ```
 
 ## What's in this repo
 
-- **GitHub Releases** (`weave-v*` tags) — the `weave-viewer-cli-macos-arm64.tar.gz` binary tarball plus its `.sha256` checksum, built and published by upstream CI.
-- `latest.json` — machine-readable pointer to the current release (tag, version, asset URL, sha256). Auto-updated on each release by `.github/workflows/update-latest.yml`.
+- **GitHub Releases** (`weave-v*` tags) — the `weave-viewer-cli-macos-arm64.tar.gz` binary tarball, built and published by upstream CI.
 - `examples/` — designer-facing curated `.weave` projects. Each subfolder is a self-contained project. Clone the repo, then point `weave-viewer-cli` at a folder.
-- `docs/` — CSS/HTML feature-support reference and the weave-extensions spec, refreshed from each release.
-- `scripts/update-latest.sh` — local/offline equivalent of the release workflow (refreshes `latest.json` + `docs/`).
+- `docs/` — CSS/HTML feature-support reference and the weave-extensions spec.
 
 ## Install (macOS, Apple Silicon only)
 
 Weave is currently experimental and supports **macOS (Apple Silicon / M-series ARM64)** only.
-There is no package manager involved — download the tarball from this repo's GitHub Releases,
-verify its checksum, and extract it.
+There is no package manager involved — download the tarball from this repo's GitHub Releases and
+extract it.
 
 ```bash
 # GitHub redirects /releases/latest/download/<asset> to the newest release's asset.
 BASE="https://github.com/veedstudio/weave-renderer-public-releases/releases/latest/download"
 
-# 1. Download the binary tarball + its checksum
+# 1. Download the binary tarball
 curl -fL -O "$BASE/weave-viewer-cli-macos-arm64.tar.gz"
-curl -fL -O "$BASE/weave-viewer-cli-macos-arm64.tar.gz.sha256"
 
-# 2. Verify the checksum (must print "OK")
-shasum -a 256 -c weave-viewer-cli-macos-arm64.tar.gz.sha256
-
-# 3. Extract — the tarball is self-contained
+# 2. Extract — the tarball is self-contained
 tar -xzf weave-viewer-cli-macos-arm64.tar.gz
 ```
 
-(For a specific version, swap `latest/download` for `download/<weave-vX.Y.Z>`.
-`latest.json` records the current tag/version/sha256 for scripted installs.)
+(For a specific version, swap `latest/download` for `download/<weave-vX.Y.Z>`.)
 
 The tarball is **self-contained**: the binary ships alongside its `shaders/`, `data/fonts/`, and
 `lib/` directories, which must stay adjacent to the executable. Run it in place (or move the whole
@@ -64,30 +57,7 @@ xattr -dr com.apple.quarantine ./weave-viewer-cli
 
 (Or right-click the binary in Finder → **Open** the first time.)
 
-## Latest release
-
-`latest.json` (repo root) is the machine-readable source of truth for the current release:
-
-```json
-{
-  "tool": "weave-viewer-cli",
-  "tag": "weave-v0.4.0",
-  "version": "0.4.0",
-  "platform": "macos-arm64",
-  "asset": "weave-viewer-cli-macos-arm64.tar.gz",
-  "url": "https://github.com/veedstudio/weave-renderer-public-releases/releases/download/weave-v0.4.0/weave-viewer-cli-macos-arm64.tar.gz",
-  "sha256": "…",
-  "published_at": "…"
-}
-```
-
-Fetch the download URL and checksum directly for scripted installs/self-update checks:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/veedstudio/weave-renderer-public-releases/main/latest.json
-```
-
-You can also browse the GitHub **[Releases](https://github.com/veedstudio/weave-renderer-public-releases/releases/latest)** page.
+Browse all versions on the GitHub **[Releases](https://github.com/veedstudio/weave-renderer-public-releases/releases/latest)** page.
 
 ## First use
 
@@ -140,14 +110,9 @@ installed before cloning, or the media will arrive as pointer text.
 ## How releases work
 
 The upstream private monorepo's CI builds the binary and, on tag push, publishes a `weave-v*`
-**Release** here with assets: `weave-viewer-cli-macos-arm64.tar.gz` + its `.sha256`, plus
-`feature-support.md` and `weave-extensions.md`. On each published release,
-`.github/workflows/update-latest.yml` refreshes `latest.json` (version + sha256 + url +
-published_at) and copies the docs into `docs/`. Source code is **not** distributed via this repo.
-
-To refresh manually (e.g. offline): `scripts/update-latest.sh [weave-vX.Y.Z]` (defaults to the
-latest release). It downloads the `.sha256`, rebuilds `latest.json`, and refreshes `docs/`. It does
-not commit.
+**Release** here with the `weave-viewer-cli-macos-arm64.tar.gz` tarball. Use the GitHub Releases
+page (or the `/releases/latest/download/` redirect shown above) to fetch it. Source code is **not**
+distributed via this repo.
 
 ## Docs
 
