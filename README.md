@@ -30,20 +30,22 @@ There is no package manager involved — download the tarball from this repo's G
 verify its checksum, and extract it.
 
 ```bash
-# 1. Pick the version (latest is recorded in latest.json)
-TAG=$(curl -fsSL https://raw.githubusercontent.com/veedstudio/weave-renderer-public-releases/main/latest.json | python3 -c 'import json,sys;print(json.load(sys.stdin)["tag"])')
-BASE="https://github.com/veedstudio/weave-renderer-public-releases/releases/download/$TAG"
+# GitHub redirects /releases/latest/download/<asset> to the newest release's asset.
+BASE="https://github.com/veedstudio/weave-renderer-public-releases/releases/latest/download"
 
-# 2. Download the binary tarball + its checksum
+# 1. Download the binary tarball + its checksum
 curl -fL -O "$BASE/weave-viewer-cli-macos-arm64.tar.gz"
 curl -fL -O "$BASE/weave-viewer-cli-macos-arm64.tar.gz.sha256"
 
-# 3. Verify the checksum (must print "OK")
+# 2. Verify the checksum (must print "OK")
 shasum -a 256 -c weave-viewer-cli-macos-arm64.tar.gz.sha256
 
-# 4. Extract — the tarball is self-contained
+# 3. Extract — the tarball is self-contained
 tar -xzf weave-viewer-cli-macos-arm64.tar.gz
 ```
+
+(For a specific version, swap `latest/download` for `download/<weave-vX.Y.Z>`.
+`latest.json` records the current tag/version/sha256 for scripted installs.)
 
 The tarball is **self-contained**: the binary ships alongside its `shaders/`, `data/fonts/`, and
 `lib/` directories, which must stay adjacent to the executable. Run it in place (or move the whole

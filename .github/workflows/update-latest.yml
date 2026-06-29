@@ -21,52 +21,32 @@ jobs:
   update-latest:
     runs-on: ubuntu-latest
     steps:
+      # Check out the default branch tip (not the release tag's detached commit)
+      # so the commit step below is a fast-forward push.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
 
+      # Tag flows through env (never inline ${{ }} in the script body) to avoid
+      # shell injection from an attacker-influenced tag name.
       - name: Refresh latest.json + docs from the release
         env:
           GH_TOKEN: ${{ github.token }}
-          REPO_SLUG: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
-          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
           case "$TAG" in
             weave-v*) ;;
             *) echo "Tag '$TAG' is not a weave-v* release tag — skipping."; exit 0 ;;
           esac
-          VERSION="${TAG#weave-v}"
-          ASSET="weave-viewer-cli-macos-arm64.tar.gz"
-          echo "Syncing latest.json to $TAG (version $VERSION)"
-
-          gh release download "$TAG" \
-            --pattern "$ASSET.sha256" \
-            --pattern 'feature-support.md' \
-            --pattern 'weave-extensions.md' \
-            --dir /tmp/rel --clobber
-          SHA="$(cut -d' ' -f1 < "/tmp/rel/$ASSET.sha256")"
-          [ -n "$SHA" ] || { echo "ERROR: empty sha256 from release asset"; exit 1; }
-
-          PUBLISHED_AT="$(gh release view "$TAG" --json publishedAt --jq '.publishedAt')"
-          URL="https://github.com/$REPO_SLUG/releases/download/$TAG/$ASSET"
-
-          jq -n \
-            --arg tool "weave-viewer-cli" --arg tag "$TAG" --arg version "$VERSION" \
-            --arg platform "macos-arm64" --arg asset "$ASSET" --arg url "$URL" \
-            --arg sha256 "$SHA" --arg published_at "$PUBLISHED_AT" \
-            '{tool: $tool, tag: $tag, version: $version, platform: $platform,
-              asset: $asset, url: $url, sha256: $sha256, published_at: $published_at}' \
-            > latest.json
-
-          jq -e --arg v "$VERSION" --arg s "$SHA" \
-            '.version == $v and .sha256 == $s' latest.json >/dev/null \
-            || { echo "ERROR: latest.json did not update as expected"; exit 1; }
-
-          mkdir -p docs
-          [ -f /tmp/rel/feature-support.md ]  && cp /tmp/rel/feature-support.md  docs/feature-support.md  || true
-          [ -f /tmp/rel/weave-extensions.md ] && cp /tmp/rel/weave-extensions.md docs/weave-extensions.md || true
+          # Single source of truth: the committed script does the download + sha
+          # extraction + latest.json build + docs refresh.
+          scripts/update-latest.sh "$TAG"
 
       - name: Commit if changed
+        env:
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
@@ -76,6 +56,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "latest.json + docs already current; nothing to commit."
           else
-            git commit -m "release: weave-viewer-cli ${{ github.event.release.tag_name || github.event.inputs.tag }}"
+            git commit -m "release: weave-viewer-cli $TAG"
             git push origin HEAD:${{ github.event.repository.default_branch }}
           fi
