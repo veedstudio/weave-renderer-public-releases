@@ -131,6 +131,6 @@ distributed via this repo.
 This repository contains two kinds of material under two different licenses:
 
 - **Repository content** — the documentation and example `.weave` projects — is licensed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
-- **The `weave-viewer-cli` binary**, distributed via this repo's GitHub Releases, is **proprietary and closed-source**. Its use is governed by an end-user license agreement bundled inside each release archive. See [`EULA.txt`](EULA.txt) for the current (placeholder) terms.
+- **The `weave-viewer-cli` binary**, distributed via this repo's GitHub Releases, is licensed under the **PolyForm Shield License 1.0.0** — a source-available license that permits any use except building a product that competes with VEED. See [`LICENSE-binary.md`](LICENSE-binary.md).
 
 Bundled third-party assets in `examples/` and fonts fetched at runtime retain their own respective licenses.
