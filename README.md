@@ -46,10 +46,13 @@ extracted folder), then invoke `./weave-viewer-cli`.
 
 `ffmpeg` is required for `--record` (MP4 encoding). Install it separately, e.g. `brew install ffmpeg`.
 
-### Unsigned binary — Gatekeeper note
+### Signing & Gatekeeper
 
-The current binary is **not yet code-signed or notarized** (signing is a planned phase). On first
-run macOS may quarantine it. Clear the quarantine attribute on the extracted folder:
+Releases from **v0.8.0** onward are **Developer ID signed and notarized by Apple**, so they run
+without any Gatekeeper prompt or workaround — just extract and run.
+
+Older releases (**v0.7.x and earlier**) are unsigned; on first run macOS may quarantine them. Clear
+the quarantine attribute on the extracted folder:
 
 ```bash
 xattr -dr com.apple.quarantine ./weave-viewer-cli
