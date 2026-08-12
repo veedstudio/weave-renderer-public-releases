@@ -48,7 +48,7 @@ extracted folder), then invoke `./weave-viewer-cli`.
 
 ### Signing & Gatekeeper
 
-Releases from **v0.8.0** onward are **Developer ID signed and notarized by Apple**, so they run
+Releases from **v0.8.0** onward are **signed and notarized by Apple**, so they run
 without any Gatekeeper prompt or workaround — just extract and run.
 
 Older releases (**v0.7.x and earlier**) are unsigned; on first run macOS may quarantine them. Clear
